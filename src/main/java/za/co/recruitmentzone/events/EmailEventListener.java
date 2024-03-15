@@ -62,7 +62,6 @@ public class EmailEventListener {
         } catch (Exception e) {
             log.info("Email Notification Failed");
             log.info(e.getMessage());
-            // Handle exception (log or throw custom exception)
         }
     }
 

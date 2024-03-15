@@ -126,17 +126,10 @@ public class BackupService {
 
             String filePath = downloadPath + File.separator + fileName;
 
+            try (FileWriter writer = new FileWriter(filePath, false)){
 
-            try {
-                // Create FileWriter with append mode set to false
-                FileWriter writer = new FileWriter(filePath, false);
-
-                // Write StringBuffer content to the file
                 writer.write(sb.toString());
-
-                // Close the writer
                 writer.close();
-
                 System.out.println("Contents written to file successfully.");
 
             } catch (IOException e) {

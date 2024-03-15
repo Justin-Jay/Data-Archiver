@@ -26,10 +26,6 @@ public class GCloudConfig {
 
     @Bean
     public Storage storage() throws IOException {
-        // Path to your service account key JSON file
-        String credentialsPath = gcloudkey;
-
-
         log.info("Trying to get key file ");
         FileInputStream file = getKey();
         GoogleCredentials credentials = GoogleCredentials.fromStream(file);
@@ -42,11 +38,10 @@ public class GCloudConfig {
         String directoryPath = gcloudkey;
         log.info("directoryPath: {}",gcloudkey);
         // File extension or name
-        String filter = "*.json"; // Replace with your desired extension or file name
+        String filter = "*.json";
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(directoryPath), filter)) {
             for (Path path : directoryStream) {
                 System.out.println("Found matching file: " + path.getFileName());
-                // Assuming only one file matches the filter, return its FileInputStream
                 return new FileInputStream(path.toFile());
             }
         } catch (IOException e) {

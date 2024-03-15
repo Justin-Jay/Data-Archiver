@@ -18,5 +18,4 @@ RUN mkdir -p /data/backups/
 
 RUN mkdir -p /DataArchiver/Logs/
 
-# Entry point or command to start your application
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
