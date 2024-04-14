@@ -96,7 +96,7 @@ public class BackupService {
         log.info("triggerNotication");
         ContactMessage message = new ContactMessage();
         message.setName(admin_name);
-        log.info("Notification To: {}", admin_name);
+        log.info("Notification From: {}", admin_name);
         message.setFromEmail(rzoneFromAddress);
         log.info("Using Mail Box: {}", rzoneFromAddress);
         message.setSubject("Back Up Notification");
