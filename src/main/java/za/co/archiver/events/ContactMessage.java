@@ -1,4 +1,4 @@
-package za.co.recruitmentzone.events;
+package za.co.archiver.events;
 
 public class ContactMessage {
     private String name;

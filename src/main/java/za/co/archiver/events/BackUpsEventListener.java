@@ -1,5 +1,6 @@
-package za.co.recruitmentzone.events;
+package za.co.archiver.events;
 
+import com.google.cloud.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,40 +12,39 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Component
-public class EmailEventListener {
+public class BackUpsEventListener {
 
-    Logger log = LoggerFactory.getLogger(EmailEventListener.class);
+    Logger log = LoggerFactory.getLogger(BackUpsEventListener.class);
     private final JavaMailSenderImpl javaMailSender;
-
+    private final Storage storage;
 
     @Value("${spring.mail.username}")
     String rzoneFromAddress;
     @Value("${admin.mail.to.address}")
     String rzoneToAddress;
 
-    @Value("${date.format}")
+ /*   @Value("${date.format}")
     String DATE_FORMAT;
-
+*/
 
     @Value("${bkadmin.name}")
     String admin;
 
-
-    public EmailEventListener(JavaMailSenderImpl javaMailSender) {
+    public BackUpsEventListener(JavaMailSenderImpl javaMailSender, Storage storage) {
         this.javaMailSender = javaMailSender;
+        this.storage = storage;
     }
 
     @EventListener
-    public void onWebsiteQueryReceived(BackUpEvent event) {
-        log.info("Executing onWebsiteQueryReceived");
+    public void onBackUpEventCompleted(Notification event) {
+        log.info("Executing onBackUpEventReceived");
 
         sendNotification(event);
 
-        log.info("DONE Executing onWebsiteQueryReceived");
+        log.info("DONE Executing onBackUpEventReceived");
     }
 
-
-    public void sendNotification(BackUpEvent event) {
+    public void sendNotification(Notification event) {
         SimpleMailMessage message = new SimpleMailMessage();
         ContactMessage eventMessage = event.getMessage();
         message.setFrom(eventMessage.getFromEmail());

@@ -33,10 +33,6 @@ db:
   location: ${DB_FILE_PATH}
   name: ${DB_FILE_NAME}
 
-
-  key: ${G_CLOUD_KEY_PATH}
-
-
 date:
  format: yyyy_MM_dd
 
@@ -48,6 +44,6 @@ encryption:
 
 
 LOGS: ${LOGS}
-KEY_DIR: ${KEY_DIR}
+KEY_DIR: ${G_CLOUD_KEY_PATH}
 
 

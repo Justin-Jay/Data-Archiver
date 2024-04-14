@@ -1,4 +1,4 @@
-package za.co.recruitmentzone.events;
+package za.co.archiver.events;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,11 +10,16 @@ public class EmailEventPublisher {
     private final ApplicationEventPublisher eventPublisher;
     private final Logger log = LoggerFactory.getLogger(EmailEventPublisher.class);
 
+    private final String CRON_TIMER = "0 0 0/1 1/1 * ? *";
+
     public EmailEventPublisher(ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;
     }
+
+
+
     public boolean publishBackUpEvent(ContactMessage message) {
-        BackUpEvent bk = new BackUpEvent(message);
+        Notification bk = new Notification(message);
         log.info("Executing publishBackUpEvent");
         try {
             eventPublisher.publishEvent(bk);
@@ -26,11 +31,6 @@ public class EmailEventPublisher {
         }
 
     }
-
-
-
-
-
 
 
 

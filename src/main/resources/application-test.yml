@@ -1,0 +1,57 @@
+server:
+  port: ${SERVER_PORT}
+  error:
+    whitelabel:
+      enabled: true
+spring:
+  application:
+    name: data-archiver
+  main:
+    banner-mode: off
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${BOT_EMAIL}
+    password: ${BOT_EMAIL_PASSWORD}
+    protocol: smtp
+
+  threads:
+    virtual:
+      enabled: true
+
+admin:
+  mail:
+    to:
+      address: ${ADMIN_EMAIL}
+
+
+storage:
+  bucket: ${BUCKET_NAME}
+
+db:
+  prefix: ${DB_PREFIX}
+  file:
+    location: ${DB_FILE_PATH}
+    name: ${DB_FILE_NAME}
+
+destination:
+  file:
+    name: ${DestinationFileName}
+
+download:
+  folder: ${DownloadFolder}
+
+date:
+  format: dd_MM_yyyy
+
+bkadmin:
+  name: ${ADMIN_NAME}
+
+encryption:
+  key: ${FILE_ENC_KEY}
+
+
+LOGS: ${LOGS}
+KEY_DIR: ${G_CLOUD_KEY_PATH}
+
+

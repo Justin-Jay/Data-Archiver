@@ -1,11 +1,11 @@
-package za.co.recruitmentzone.events;
+package za.co.archiver.events;
 
 
-public class BackUpEvent {
+public class Notification {
 
     private ContactMessage message;
 
-    public BackUpEvent(ContactMessage message) {
+    public Notification(ContactMessage message) {
         this.message = message;
     }
 
