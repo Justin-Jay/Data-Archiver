@@ -1,7 +1,6 @@
 package za.co.backups.service;
 
 
-import com.google.cloud.ReadChannel;
 import com.google.cloud.storage.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,6 @@ import za.co.backups.events.EmailEventPublisher;
 
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,9 +22,9 @@ import java.time.format.DateTimeFormatter;
 import java.io.IOException;
 
 @Component
-public class BackupService {
+public class BackupServiceImpl implements BackUpService {
     private final Storage storage;
-    private final Logger log = LoggerFactory.getLogger(BackupService.class);
+    private final Logger log = LoggerFactory.getLogger(BackupServiceImpl.class);
 
     @Value("${storage.bucket}")
     private String STORAGE_BUCKET;
@@ -35,7 +33,7 @@ public class BackupService {
     String BASE_DIR;
 
     @Value("${db.file.name}")
-    String DB_FILE_NAME;
+    String BACKUP_FILE_NAME;
 
     @Value("${date.format}")
     String DATE_FORMAT;
@@ -45,24 +43,27 @@ public class BackupService {
     @Value("${admin.mail.to.address}")
     String rzoneToAddress;
     private final String CRON_TIMER = "0 0 0/1 1/1 * ? *";
+
     String FILE_PATH_SPLIT = "/";
-    String DB_BACK_UP = "DB-BackUps";
+
+    @Value("${base.bucket.folder}")
+    String BASE_BACKUP_FOLDER;
 
     @Value("${bkadmin.name}")
     String admin_name;
 
 
-
     private final EmailEventPublisher eventPublisher;
 
-    public BackupService(Storage storage, EmailEventPublisher eventPublisher) {
+    public BackupServiceImpl(Storage storage, EmailEventPublisher eventPublisher) {
         this.storage = storage;
         this.eventPublisher = eventPublisher;
     }
 
 
     // @Scheduled(cron = CRON_TIMER) // This cron expression triggers the method every midnight
-    public void startBackUp() throws Exception {
+    @Override
+    public void startBackUp() {
         log.info("Back Up Started....");
         String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
         LocalTime time = LocalTime.now();
@@ -73,12 +74,15 @@ public class BackupService {
         // Format the time using the formatter
         String formattedTime = time.format(formatter);
 
-        String destinationFileName = DB_BACK_UP + FILE_PATH_SPLIT + formattedDate + FILE_PATH_SPLIT + formattedTime + FILE_PATH_SPLIT + DB_FILE_NAME;
+        String destinationFileName = BASE_BACKUP_FOLDER + FILE_PATH_SPLIT + formattedDate + FILE_PATH_SPLIT + formattedTime + FILE_PATH_SPLIT + BACKUP_FILE_NAME;
+
         BlobId id = BlobId.of(STORAGE_BUCKET, destinationFileName);
         BlobInfo info = BlobInfo.newBuilder(id).build();
-        File inputFile = new File(BASE_DIR, DB_FILE_NAME);
+
+        File inputFile = new File(BASE_DIR, BACKUP_FILE_NAME);
+
         log.info("BASE_DIR: {}", BASE_DIR);
-        log.info("DB_FILE_NAME: {}", DB_FILE_NAME);
+        log.info("BACKUP_FILE_NAME: {}", BACKUP_FILE_NAME);
         log.info("inputFile: {}", inputFile.getAbsolutePath());
         log.info("STORAGE_BUCKET: {}", STORAGE_BUCKET);
         log.info("destinationFileName: {}", destinationFileName);
@@ -87,11 +91,19 @@ public class BackupService {
         Blob backUp = storage.create(info, arr);
 
         log.info("Back up file {} Completed....", backUp.getBlobId());
+
         triggerNotication(formattedDate, backUp.getBlobId().toString());
-        boolean d = inputFile.delete();
-        log.info("File Deleted {}....", d);
+        boolean d = false;
+        try {
+            Files.delete(inputFile.toPath());
+            d = true;
+        } catch (IOException ioException){
+            log.error(ioException.getMessage());
+        }
+        log.info("Input File Deleted {}....", d);
     }
 
+    @Override
     public void triggerNotication(String formattedDate, String blobID) {
         log.info("triggerNotication");
         ContactMessage message = new ContactMessage();
@@ -107,7 +119,8 @@ public class BackupService {
         eventPublisher.publishBackUpEvent(message);
     }
 
-    public String downloadBackUp(String fileDate) {
+/*    @Override
+    public String downloadBackUp(String fileDate,String bucket) {
         StringBuffer sb = new StringBuffer();
 
         String destinationFileName = DB_BACK_UP + FILE_PATH_SPLIT + fileDate + FILE_PATH_SPLIT + DB_FILE_NAME;
@@ -126,7 +139,7 @@ public class BackupService {
 
             String filePath = downloadPath + File.separator + fileName;
 
-            try (FileWriter writer = new FileWriter(filePath, false)){
+            try (FileWriter writer = new FileWriter(filePath, false)) {
 
                 writer.write(sb.toString());
                 writer.close();
@@ -140,16 +153,33 @@ public class BackupService {
             throw new RuntimeException(e);
         }
 
+    }*/
+
+    @Override
+    public byte[] readBytesFromFile(Path filePath) {
+
+        byte[] returnArray = null;
+
+        try {
+            returnArray = Files.readAllBytes(filePath);
+        } catch (IOException ioException) {
+            log.info("Could not read to file: {}", ioException.getMessage());
+        }
+
+        return returnArray;
+
     }
 
-    public byte[] readBytesFromFile(Path filePath) throws IOException {
+    @Override
+    public void writeBytesToFile(byte[] data, String filePath) {
 
-        return Files.readAllBytes(filePath);
-    }
+        try {
+            Path path = Paths.get(filePath);
+            Files.write(path, data);
+        } catch (IOException ioException) {
+            log.info("Could not write to file: {}", ioException.getMessage());
+        }
 
-    private void writeBytesToFile(byte[] data, String filePath) throws IOException {
-        Path path = Paths.get(filePath);
-        Files.write(path, data);
     }
 
 }

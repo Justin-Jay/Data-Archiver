@@ -8,7 +8,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import org.springframework.context.annotation.Bean;
-import za.co.backups.service.BackupService;
+import za.co.backups.service.BackupServiceImpl;
 
 @SpringBootApplication
 public class DatabaseArchiver {
@@ -16,7 +16,7 @@ public class DatabaseArchiver {
     Logger log = LoggerFactory.getLogger(DatabaseArchiver.class);
 
     @Autowired
-    BackupService backupService;
+    BackupServiceImpl backupServiceImpl;
 
     public static void main(String[] args) {
         SpringApplication.run(DatabaseArchiver.class, args);
@@ -27,7 +27,7 @@ public class DatabaseArchiver {
     public CommandLineRunner appStarter() {
         return (args) -> {
             log.info("Application Started...");
-            backupService.startBackUp();
+            backupServiceImpl.startBackUp();
         };
     }
 }

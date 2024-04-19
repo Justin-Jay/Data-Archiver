@@ -1,16 +1,16 @@
 FROM eclipse-temurin:17-jre AS builder
 
-WORKDIR /DatabaseArchiver
+WORKDIR /DataArchiver
 ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} DatabaseArchiver.jar
-RUN java -Djarmode=layertools -jar DatabaseArchiver.jar extract
+COPY ${JAR_FILE} DataArchiver.jar
+RUN java -Djarmode=layertools -jar DataArchiver.jar extract
 
 FROM eclipse-temurin:17-jre
 
-COPY --from=builder DatabaseArchiver/dependencies/ ./
-COPY --from=builder DatabaseArchiver/spring-boot-loader/ ./
-COPY --from=builder DatabaseArchiver/snapshot-dependencies/ ./
-COPY --from=builder DatabaseArchiver/application/ ./
+COPY --from=builder DataArchiver/dependencies/ ./
+COPY --from=builder DataArchiver/spring-boot-loader/ ./
+COPY --from=builder DataArchiver/snapshot-dependencies/ ./
+COPY --from=builder DataArchiver/application/ ./
 
 RUN mkdir -p /Gcloud/Key/
 

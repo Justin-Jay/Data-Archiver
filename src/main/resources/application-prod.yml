@@ -31,10 +31,7 @@ storage:
 db:
  file:
   location: ${DB_FILE_PATH}
-  name: ${DB_FILE_NAME}
-
-
-  key: ${G_CLOUD_KEY_PATH}
+  name: ${BACKUP_FILE_NAME}
 
 
 date:
@@ -42,9 +39,6 @@ date:
 
 bkadmin:
   name: ${ADMIN_NAME}
-
-encryption:
- key: ${FILE_ENC_KEY}
 
 
 LOGS: ${LOGS}

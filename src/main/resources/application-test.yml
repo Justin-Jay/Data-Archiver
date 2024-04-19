@@ -4,20 +4,20 @@ server:
     whitelabel:
       enabled: true
 spring:
-   application:
-     name: data-archiver
-   main:
-     banner-mode: off
-   mail:
-     host: ${MAIL_HOST}
-     port: ${MAIL_PORT}
-     username: ${BOT_EMAIL}
-     password: ${BOT_EMAIL_PASSWORD}
-     protocol: smtp
+  application:
+    name: data-archiver
+  main:
+    banner-mode: off
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${BOT_EMAIL}
+    password: ${BOT_EMAIL_PASSWORD}
+    protocol: smtp
 
-   threads:
-     virtual:
-       enabled: true
+  threads:
+    virtual:
+      enabled: true
 
 admin:
   mail:
@@ -26,28 +26,24 @@ admin:
 
 
 storage:
-    bucket: ${BUCKET_NAME}
+  bucket: ${BUCKET_NAME}
 
 db:
- file:
-  location: ${DB_FILE_PATH}
-  name: ${DB_FILE_NAME}
-
-
-  key: ${G_CLOUD_KEY_PATH}
+  file:
+    location: ${DB_FILE_PATH}
+    name: ${BACKUP_FILE_NAME}
 
 
 date:
- format: yyyy_MM_dd
+  format: yyyy_MM_dd
 
 bkadmin:
   name: ${ADMIN_NAME}
-
-encryption:
- key: ${FILE_ENC_KEY}
 
 
 LOGS: ${LOGS}
 KEY_DIR: ${KEY_DIR}
 
-
+base:
+  bucket:
+    folder: ${BASE_BACKUP_FOLDER}
