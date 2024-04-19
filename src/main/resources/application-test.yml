@@ -34,7 +34,6 @@ db:
   name: ${DB_FILE_NAME}
 
 
-  key: ${G_CLOUD_KEY_PATH}
 
 
 date:

@@ -1,4 +1,4 @@
-package za.co.recruitmentzone.service;
+package za.co.archiver.service;
 
 
 import com.google.cloud.ReadChannel;
@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Component;
-import za.co.recruitmentzone.events.ContactMessage;
-import za.co.recruitmentzone.events.EmailEventPublisher;
+import za.co.archiver.events.ContactMessage;
+import za.co.archiver.events.EmailEventPublisher;
 
 
 import java.io.*;
@@ -50,7 +50,6 @@ public class BackupService {
 
     @Value("${bkadmin.name}")
     String admin_name;
-
 
 
     private final EmailEventPublisher eventPublisher;
