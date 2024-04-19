@@ -1,4 +1,4 @@
-package za.co.recruitmentzone.service;
+package za.co.backups.service;
 
 
 import com.google.cloud.ReadChannel;
@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Component;
-import za.co.recruitmentzone.events.ContactMessage;
-import za.co.recruitmentzone.events.EmailEventPublisher;
+import za.co.backups.events.ContactMessage;
+import za.co.backups.events.EmailEventPublisher;
 
 
 import java.io.*;

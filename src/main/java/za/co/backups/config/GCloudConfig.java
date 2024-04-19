@@ -1,4 +1,4 @@
-package za.co.recruitmentzone.config;
+package za.co.backups.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import org.slf4j.Logger;
