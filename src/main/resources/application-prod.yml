@@ -30,7 +30,6 @@ storage:
 
 db:
  file:
-  location: ${DB_FILE_PATH}
   name: ${BACKUP_FILE_NAME}
 
 
@@ -45,3 +44,10 @@ LOGS: ${LOGS}
 KEY_DIR: ${KEY_DIR}
 
 
+base:
+  bucket:
+    folder: ${BASE_BACKUP_FOLDER}
+
+backup:
+    file:
+      filter: ${FILE_FILTER}

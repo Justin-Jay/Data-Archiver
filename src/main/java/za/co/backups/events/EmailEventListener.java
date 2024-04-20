@@ -49,7 +49,7 @@ public class EmailEventListener {
         ContactMessage eventMessage = event.getMessage();
         message.setFrom(eventMessage.getFromEmail());
         message.setTo(eventMessage.getToEmail());
-        message.setSubject("DB Back Up Successful");
+        message.setSubject("Back Up Successful");
         String emailContent = "Hello " + eventMessage.getName() + ",\n\n"
                 + "Back Up Completed At: " + eventMessage.getCompletionTime() + "\n"
                 + "Back Up Blob ID: " + eventMessage.getBlobID() + "\n\n"

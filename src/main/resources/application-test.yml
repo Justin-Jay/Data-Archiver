@@ -30,7 +30,7 @@ storage:
 
 db:
   file:
-    location: ${DB_FILE_PATH}
+    location: ${BACKUP_FILE_DIR}
     name: ${BACKUP_FILE_NAME}
 
 
@@ -46,4 +46,8 @@ KEY_DIR: ${KEY_DIR}
 
 base:
   bucket:
-    folder: ${BASE_BACKUP_FOLDER}
+    folder: ${BASE_BUCKET_BACKUP_FOLDER}
+
+backup:
+  file:
+    filter: ${FILE_FILTER}

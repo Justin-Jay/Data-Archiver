@@ -4,6 +4,7 @@ package za.co.backups.service;
 import com.google.cloud.storage.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Component;
@@ -12,6 +13,7 @@ import za.co.backups.events.EmailEventPublisher;
 
 
 import java.io.*;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,8 +31,9 @@ public class BackupServiceImpl implements BackUpService {
     @Value("${storage.bucket}")
     private String STORAGE_BUCKET;
 
+
     @Value("${db.file.location}")
-    String BASE_DIR;
+    String BACKUP_FILE_DIR;
 
     @Value("${db.file.name}")
     String BACKUP_FILE_NAME;
@@ -47,11 +50,13 @@ public class BackupServiceImpl implements BackUpService {
     String FILE_PATH_SPLIT = "/";
 
     @Value("${base.bucket.folder}")
-    String BASE_BACKUP_FOLDER;
+    String BASE_BUCKET_BACKUP_FOLDER;
 
     @Value("${bkadmin.name}")
     String admin_name;
 
+    @Value("${backup.file.filter}")
+    String filter;
 
     private final EmailEventPublisher eventPublisher;
 
@@ -65,42 +70,57 @@ public class BackupServiceImpl implements BackUpService {
     @Override
     public void startBackUp() {
         log.info("Back Up Started....");
-        String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
-        LocalTime time = LocalTime.now();
 
-        // Define the pattern for formatting
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH_mm_ss");
+        File inputFile = null;
 
-        // Format the time using the formatter
-        String formattedTime = time.format(formatter);
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(BACKUP_FILE_DIR), filter)) {
+            for (Path path : directoryStream) {
+                inputFile = new File(path.toUri());
+                System.out.println("Found matching file: " + path.getFileName());
 
-        String destinationFileName = BASE_BACKUP_FOLDER + FILE_PATH_SPLIT + formattedDate + FILE_PATH_SPLIT + formattedTime + FILE_PATH_SPLIT + BACKUP_FILE_NAME;
+                String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
+                LocalTime time = LocalTime.now();
 
-        BlobId id = BlobId.of(STORAGE_BUCKET, destinationFileName);
-        BlobInfo info = BlobInfo.newBuilder(id).build();
+                // Define the pattern for formatting
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH_mm_ss");
 
-        File inputFile = new File(BASE_DIR, BACKUP_FILE_NAME);
+                // Format the time using the formatter
+                String formattedTime = time.format(formatter);
 
-        log.info("BASE_DIR: {}", BASE_DIR);
-        log.info("BACKUP_FILE_NAME: {}", BACKUP_FILE_NAME);
-        log.info("inputFile: {}", inputFile.getAbsolutePath());
-        log.info("STORAGE_BUCKET: {}", STORAGE_BUCKET);
-        log.info("destinationFileName: {}", destinationFileName);
+                String destinationFileName = BASE_BUCKET_BACKUP_FOLDER + FILE_PATH_SPLIT + formattedDate + FILE_PATH_SPLIT + formattedTime + FILE_PATH_SPLIT + BACKUP_FILE_NAME;
 
-        byte[] arr = readBytesFromFile(Paths.get(inputFile.toURI()));
-        Blob backUp = storage.create(info, arr);
+                BlobId id = BlobId.of(STORAGE_BUCKET, destinationFileName);
+                BlobInfo info = BlobInfo.newBuilder(id).build();
 
-        log.info("Back up file {} Completed....", backUp.getBlobId());
 
-        triggerNotication(formattedDate, backUp.getBlobId().toString());
-        boolean d = false;
-        try {
-            Files.delete(inputFile.toPath());
-            d = true;
-        } catch (IOException ioException){
-            log.error(ioException.getMessage());
+                log.info("BACKUP_FILE_DIR: {}", BACKUP_FILE_DIR);
+                log.info("BACKUP_FILE_NAME: {}", BACKUP_FILE_NAME);
+                log.info("inputFile: {}", inputFile.getAbsolutePath());
+                log.info("STORAGE_BUCKET: {}", STORAGE_BUCKET);
+                log.info("destinationFileName: {}", destinationFileName);
+
+                byte[] arr = readBytesFromFile(Paths.get(inputFile.toURI()));
+                Blob backUp = storage.create(info, arr);
+
+                log.info("Back up file {} Completed....", backUp.getBlobId());
+
+                triggerNotication(formattedDate, backUp.getBlobId().toString());
+
+                boolean d = false;
+                try {
+                    //Files.delete(Paths.get(inputFile.toURI()));
+                    d = inputFile.delete();
+                    log.info("Input file deleted: {}", d);
+                } catch (Exception e){
+                    log.info("Failed to delete Input File \n {}", e.getMessage());
+                }
+
+                }
+        } catch (IOException e) {
+            log.info("File not loaded {}",e.getMessage());
+            e.printStackTrace();
         }
-        log.info("Input File Deleted {}....", d);
+
     }
 
     @Override
