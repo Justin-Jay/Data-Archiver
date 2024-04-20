@@ -101,17 +101,20 @@ public class BackupServiceImpl implements BackUpService {
                 byte[] arr = readBytesFromFile(Paths.get(inputFile.toURI()));
                 Blob backUp = storage.create(info, arr);
 
-                log.info("Back up file {} Completed....", backUp.getBlobId());
 
+                log.info("Back up file {} Completed....", backUp.getBlobId());
 
                 try {
                     Files.delete(Paths.get(inputFile.toURI()));
                     log.info("Input file deleted: {}", true);
                     triggerNotication(formattedDate, backUp.getBlobId().toString() + " Input File deleted");
+
+
                 } catch (Exception e) {
                     log.info("Failed to delete Input File \n {}", e.getMessage());
                     triggerNotication(formattedDate, backUp.getBlobId().toString() + " Failed to delete existing file");
                 }
+
             }
         } catch (IOException e) {
             log.info("File not loaded {}", e.getMessage());
@@ -122,7 +125,7 @@ public class BackupServiceImpl implements BackUpService {
 
     @Override
     public void triggerNotication(String formattedDate, String response) {
-        log.info("triggerNotication");
+        log.info("trigger Notification");
         ContactMessage message = new ContactMessage();
         message.setName(adminName);
         log.info("Notification From: {}", adminName);

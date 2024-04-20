@@ -11,15 +11,15 @@ import org.springframework.context.annotation.Bean;
 import za.co.backups.service.BackupServiceImpl;
 
 @SpringBootApplication
-public class DatabaseArchiver {
+public class DataArchiver {
 
-    Logger log = LoggerFactory.getLogger(DatabaseArchiver.class);
+    Logger log = LoggerFactory.getLogger(DataArchiver.class);
 
     @Autowired
     BackupServiceImpl backupServiceImpl;
 
     public static void main(String[] args) {
-        SpringApplication.run(DatabaseArchiver.class, args);
+        SpringApplication.run(DataArchiver.class, args);
     }
 
 
