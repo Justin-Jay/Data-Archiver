@@ -52,7 +52,7 @@ public class EmailEventListener {
         message.setSubject("Back Up Successful");
         String emailContent = "Hello " + eventMessage.getName() + ",\n\n"
                 + "Back Up Completed At: " + eventMessage.getCompletionTime() + "\n"
-                + "Back Up Blob ID: " + eventMessage.getBlobID() + "\n\n"
+                + "Back Up Response: " + eventMessage.getResponse() + "\n\n"
                 + "Best regards,\n"
                 + "Back Up Squad";
         message.setText(emailContent);

@@ -9,7 +9,7 @@ public class ContactMessage {
 
     String completionTime;
 
-    String blobID;
+    String response;
 
 
     public ContactMessage() {
@@ -29,12 +29,12 @@ public class ContactMessage {
         this.completionTime = completionTime;
     }
 
-    public String getBlobID() {
-        return blobID;
+    public String getResponse() {
+        return response;
     }
 
-    public void setBlobID(String blobID) {
-        this.blobID = blobID;
+    public void setResponse(String response) {
+        this.response = response;
     }
 
     public String getToEmail() {

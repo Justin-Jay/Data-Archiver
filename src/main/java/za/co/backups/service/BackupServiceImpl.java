@@ -4,7 +4,6 @@ package za.co.backups.service;
 import com.google.cloud.storage.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Component;
@@ -25,38 +24,42 @@ import java.io.IOException;
 
 @Component
 public class BackupServiceImpl implements BackUpService {
-    private final Storage storage;
+
     private final Logger log = LoggerFactory.getLogger(BackupServiceImpl.class);
 
+    private final Storage storage;
+
     @Value("${storage.bucket}")
-    private String STORAGE_BUCKET;
+    private String storageBucket;
 
 
     @Value("${db.file.location}")
-    String BACKUP_FILE_DIR;
+    private String backupFileDir;
 
     @Value("${db.file.name}")
-    String BACKUP_FILE_NAME;
+    private String backupFileName;
 
     @Value("${date.format}")
-    String DATE_FORMAT;
+    private String dateFormat;
 
     @Value("${spring.mail.username}")
-    String rzoneFromAddress;
-    @Value("${admin.mail.to.address}")
-    String rzoneToAddress;
-    private final String CRON_TIMER = "0 0 0/1 1/1 * ? *";
+    private String rzoneFromAddress;
 
-    String FILE_PATH_SPLIT = "/";
+    @Value("${admin.mail.to.address}")
+    private String rzoneToAddress;
+
+    private final String cronTimer = "0 0 0/1 1/1 * ? *";
+
+    private String filePathSplit = "/";
 
     @Value("${base.bucket.folder}")
-    String BASE_BUCKET_BACKUP_FOLDER;
+    private String baseBucketBackupFolder;
 
     @Value("${bkadmin.name}")
-    String admin_name;
+    private String adminName;
 
     @Value("${backup.file.filter}")
-    String filter;
+    private String filter;
 
     private final EmailEventPublisher eventPublisher;
 
@@ -72,31 +75,27 @@ public class BackupServiceImpl implements BackUpService {
         log.info("Back Up Started....");
 
         File inputFile = null;
+        LocalTime time = LocalTime.now();
 
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(BACKUP_FILE_DIR), filter)) {
+        // Define the pattern for formatting
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH_mm_ss");
+        String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern(dateFormat));
+        String formattedTime = time.format(formatter);
+        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(backupFileDir), filter)) {
             for (Path path : directoryStream) {
                 inputFile = new File(path.toUri());
-                System.out.println("Found matching file: " + path.getFileName());
-
-                String formattedDate = LocalDate.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
-                LocalTime time = LocalTime.now();
-
-                // Define the pattern for formatting
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH_mm_ss");
-
+                log.info("Found matching file: {}", path.getFileName());
                 // Format the time using the formatter
-                String formattedTime = time.format(formatter);
 
-                String destinationFileName = BASE_BUCKET_BACKUP_FOLDER + FILE_PATH_SPLIT + formattedDate + FILE_PATH_SPLIT + formattedTime + FILE_PATH_SPLIT + BACKUP_FILE_NAME;
+                String destinationFileName = baseBucketBackupFolder + filePathSplit + formattedDate + filePathSplit + formattedTime + filePathSplit + backupFileName;
 
-                BlobId id = BlobId.of(STORAGE_BUCKET, destinationFileName);
+                BlobId id = BlobId.of(storageBucket, destinationFileName);
                 BlobInfo info = BlobInfo.newBuilder(id).build();
 
-
-                log.info("BACKUP_FILE_DIR: {}", BACKUP_FILE_DIR);
-                log.info("BACKUP_FILE_NAME: {}", BACKUP_FILE_NAME);
+                log.info("BACKUP_FILE_DIR: {}", backupFileDir);
+                log.info("BACKUP_FILE_NAME: {}", backupFileName);
                 log.info("inputFile: {}", inputFile.getAbsolutePath());
-                log.info("STORAGE_BUCKET: {}", STORAGE_BUCKET);
+                log.info("STORAGE_BUCKET: {}", storageBucket);
                 log.info("destinationFileName: {}", destinationFileName);
 
                 byte[] arr = readBytesFromFile(Paths.get(inputFile.toURI()));
@@ -104,38 +103,36 @@ public class BackupServiceImpl implements BackUpService {
 
                 log.info("Back up file {} Completed....", backUp.getBlobId());
 
-                triggerNotication(formattedDate, backUp.getBlobId().toString());
 
-                boolean d = false;
                 try {
-                    //Files.delete(Paths.get(inputFile.toURI()));
-                    d = inputFile.delete();
-                    log.info("Input file deleted: {}", d);
-                } catch (Exception e){
+                    Files.delete(Paths.get(inputFile.toURI()));
+                    log.info("Input file deleted: {}", true);
+                    triggerNotication(formattedDate, backUp.getBlobId().toString() + " Input File deleted");
+                } catch (Exception e) {
                     log.info("Failed to delete Input File \n {}", e.getMessage());
+                    triggerNotication(formattedDate, backUp.getBlobId().toString() + " Failed to delete existing file");
                 }
-
-                }
+            }
         } catch (IOException e) {
-            log.info("File not loaded {}",e.getMessage());
-            e.printStackTrace();
+            log.info("File not loaded {}", e.getMessage());
+            triggerNotication(formattedDate, "Backup file not loaded");
         }
 
     }
 
     @Override
-    public void triggerNotication(String formattedDate, String blobID) {
+    public void triggerNotication(String formattedDate, String response) {
         log.info("triggerNotication");
         ContactMessage message = new ContactMessage();
-        message.setName(admin_name);
-        log.info("Notification From: {}", admin_name);
+        message.setName(adminName);
+        log.info("Notification From: {}", adminName);
         message.setFromEmail(rzoneFromAddress);
         log.info("Using Mail Box: {}", rzoneFromAddress);
         message.setSubject("Back Up Notification");
         message.setToEmail(rzoneToAddress);
         log.info("Sending To Mail Box: {}", rzoneToAddress);
         message.setCompletionTime(formattedDate);
-        message.setBlobID(blobID);
+        message.setResponse(response);
         eventPublisher.publishBackUpEvent(message);
     }
 
@@ -163,7 +160,8 @@ public class BackupServiceImpl implements BackUpService {
 
                 writer.write(sb.toString());
                 writer.close();
-                System.out.println("Contents written to file successfully.");
+
+                log.info("Contents written to file successfully.")
 
             } catch (IOException e) {
                 e.printStackTrace();
