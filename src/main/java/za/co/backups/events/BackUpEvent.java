@@ -1,4 +1,4 @@
-package za.co.recruitmentzone.events;
+package za.co.backups.events;
 
 
 public class BackUpEvent {
