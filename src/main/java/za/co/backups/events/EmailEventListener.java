@@ -1,4 +1,4 @@
-package za.co.recruitmentzone.events;
+package za.co.backups.events;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +35,12 @@ public class EmailEventListener {
     }
 
     @EventListener
-    public void onWebsiteQueryReceived(BackUpEvent event) {
-        log.info("Executing onWebsiteQueryReceived");
+    public void onBackUpEventEnd(BackUpEvent event) {
+        log.info("Executing onBackUpEventEnd");
 
         sendNotification(event);
 
-        log.info("DONE Executing onWebsiteQueryReceived");
+        log.info("DONE Executing onBackUpEventEnd");
     }
 
 
@@ -49,10 +49,10 @@ public class EmailEventListener {
         ContactMessage eventMessage = event.getMessage();
         message.setFrom(eventMessage.getFromEmail());
         message.setTo(eventMessage.getToEmail());
-        message.setSubject("DB Back Up Successful");
+        message.setSubject("Back Up Successful");
         String emailContent = "Hello " + eventMessage.getName() + ",\n\n"
                 + "Back Up Completed At: " + eventMessage.getCompletionTime() + "\n"
-                + "Back Up Blob ID: " + eventMessage.getBlobID() + "\n\n"
+                + "Back Up Response: " + eventMessage.getResponse() + "\n\n"
                 + "Best regards,\n"
                 + "Back Up Squad";
         message.setText(emailContent);

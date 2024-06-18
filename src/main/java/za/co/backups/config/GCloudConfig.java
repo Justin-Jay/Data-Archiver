@@ -1,4 +1,4 @@
-package za.co.recruitmentzone.config;
+package za.co.backups.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import org.slf4j.Logger;
@@ -41,15 +41,13 @@ public class GCloudConfig {
         String filter = "*.json";
         try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(directoryPath), filter)) {
             for (Path path : directoryStream) {
-                System.out.println("Found matching file: " + path.getFileName());
+                log.info("Found more than one matching file");
                 return new FileInputStream(path.toFile());
             }
+
         } catch (IOException e) {
             log.info("File not loaded {}",e.getMessage());
-            e.printStackTrace();
         }
-
-        // If no matching file is found or an exception occurs, return null
         return null;
     }
 
