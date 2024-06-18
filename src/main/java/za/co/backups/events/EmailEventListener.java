@@ -35,12 +35,12 @@ public class EmailEventListener {
     }
 
     @EventListener
-    public void onWebsiteQueryReceived(BackUpEvent event) {
-        log.info("Executing onWebsiteQueryReceived");
+    public void onBackUpEventEnd(BackUpEvent event) {
+        log.info("Executing onBackUpEventEnd");
 
         sendNotification(event);
 
-        log.info("DONE Executing onWebsiteQueryReceived");
+        log.info("DONE Executing onBackUpEventEnd");
     }
 
 
